@@ -43,6 +43,9 @@ public class MathController {
 		if (numberOne < 0 || numberTwo < 0) {
 			throw new NotIsPositiveNumberException("O número deve ser positivo.");
 		}
+		
+//		Essa exceção cai no 500 do CustomResponseEntityExceptionHandler
+//		throw new Exception("custom exception");
 
 		return numberOne - numberTwo;
 	}
