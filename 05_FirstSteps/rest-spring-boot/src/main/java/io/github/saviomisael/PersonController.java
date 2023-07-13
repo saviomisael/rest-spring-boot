@@ -3,6 +3,8 @@ package io.github.saviomisael;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.github.saviomisael.models.Person;
@@ -14,7 +16,7 @@ public class PersonController {
 	private PersonService service;
 	
 	@GetMapping("/person/{id}")
-	public Person getById(@PathVariable("id") String id) {
+	public Person getById(@PathVariable("id") long id) {
 		return service.findById(id);
 	}
 	
@@ -24,8 +26,9 @@ public class PersonController {
 	}
 	
 	@PostMapping("/person")
-	public Person create(@RequestBody Person person) {
-		return service.create(person);
+	public ResponseEntity<Person> create(@RequestBody Person person) {
+		var personFromDb = service.create(person);
+		return ResponseEntity.status(HttpStatus.CREATED).body(personFromDb);
 	}
 	
 	@PutMapping("/person/{id}")
@@ -34,8 +37,8 @@ public class PersonController {
 		return service.update(person);
 	}
 	
-	@DeleteMapping("/person/{id}")
-	public void delete(@PathVariable("id") long id) {
+	@DeleteMapping("/person/{id}")	public ResponseEntity<?> delete(@PathVariable("id") long id) {
 		service.deleteById(id);
+		return ResponseEntity.noContent().build();
 	}
 }

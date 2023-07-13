@@ -3,13 +3,27 @@ package io.github.saviomisael.models;
 import java.io.Serializable;
 import java.util.Objects;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "persons")
 public class Person implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+	
+	@Column(name = "first_name", nullable = false, length = 20)
 	private String firstName;
+	
+	@Column(name = "last_name", nullable = false, length = 20)
 	private String lastName;
+	
+	@Column(nullable = false, length = 255)
 	private String address;
+	
+	@Column(nullable = false, length = 6)
 	private String gender;
 	
 	public Person() {
