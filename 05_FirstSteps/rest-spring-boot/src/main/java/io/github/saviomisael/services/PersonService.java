@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import io.github.saviomisael.exceptions.ResourceNotFoundException;
 import io.github.saviomisael.models.Person;
 import io.github.saviomisael.repositories.PersonRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PersonService {
@@ -35,6 +36,7 @@ public class PersonService {
 		return repository.save(person);
 	}
 
+	@Transactional
 	public Person update(Person person) {
 		var entity = repository.findById(person.getId())
 				.orElseThrow(() -> new ResourceNotFoundException("No records found for this id."));
@@ -46,6 +48,7 @@ public class PersonService {
 		return repository.save(entity);
 	}
 
+	@Transactional
 	public void deleteById(long id) {
 		var entity = repository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("No records found for this id."));

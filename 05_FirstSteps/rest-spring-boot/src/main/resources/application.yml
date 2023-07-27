@@ -14,3 +14,7 @@ spring:
 springdoc:
   api-docs:
     path: /docs
+security:
+  jwt:
+    token:
+      secret-key: 85f86ed1adddc015e9be328979728d6a3fcbce54c04f6bc21795179518e3d1671791c5b1acfced8ec0a350239faa4323648f00ee99cfc765cc1f243c5a116b89
