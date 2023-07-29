@@ -3,7 +3,12 @@ package io.github.saviomisael.services;
 import java.util.List;
 import java.util.logging.Logger;
 
+import io.github.saviomisael.dto.PageResponseDto;
+import io.github.saviomisael.mapper.PageMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.stereotype.Service;
 
 import io.github.saviomisael.exceptions.ResourceNotFoundException;
@@ -13,9 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PersonService {
-	private Logger logger = Logger.getLogger(PersonService.class.getName());
+	private final Logger logger = Logger.getLogger(PersonService.class.getName());
+	private PersonRepository repository;
+
 	@Autowired
-	PersonRepository repository;
+	public PersonService(PersonRepository repository) {
+		this.repository = repository;
+	}
 
 	public Person findById(long id) {
 		logger.info("Finding one person!");
@@ -24,10 +33,12 @@ public class PersonService {
 				.orElseThrow(() -> new ResourceNotFoundException("No records found for this id."));
 	}
 
-	public List<Person> findAll() {
+	public PageResponseDto<Person> findAll(Pageable pageable, String filterByGender) {
 		logger.info("Finding all persons!");
 
-		return repository.findAll();
+		if(!filterByGender.isBlank()) return PageMapper.fromPageToPageResponse(repository.findByGender(filterByGender, pageable));
+
+		return PageMapper.fromPageToPageResponse(repository.findAll(pageable));
 	}
 
 	public Person create(Person person) {

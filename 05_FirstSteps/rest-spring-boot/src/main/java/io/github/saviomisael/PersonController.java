@@ -2,11 +2,18 @@ package io.github.saviomisael;
 
 import java.util.List;
 
+import io.github.saviomisael.dto.PageResponseDto;
+import io.github.saviomisael.helpers.PersonPageableHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -23,59 +30,64 @@ import jakarta.validation.Valid;
 
 @RestController
 public class PersonController {
-	@Autowired
-	private PersonService service;
+    @Autowired
+    private PersonService service;
 
-	@GetMapping("/person/{id}")
-	public Person getById(@PathVariable("id") long id) {
-		var person = service.findById(id);
-		person.add(linkTo(methodOn(PersonController.class).getById(id)).withSelfRel());
+    @GetMapping("/person/{id}")
+    public Person getById(@PathVariable("id") long id) {
+        var person = service.findById(id);
+        person.add(linkTo(methodOn(PersonController.class).getById(id)).withSelfRel());
 
-		return person;
-	}
+        return person;
+    }
 
-	@GetMapping("/person")
-	@Operation(summary = "Gets all people.", description = "Gets all people.")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Returns all people.", content = {
-			@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = Person.class))) }) })
-	public List<Person> getAll() {
-		var persons = service.findAll();
+    @GetMapping("/person")
+    @Operation(summary = "Gets all people.", description = "Gets all people.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Returns all people.", content = {
+            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = Person.class)))})})
+    public PageResponseDto<Person> getAll(@RequestParam(value = "page", defaultValue = "1") int page,
+                                          @RequestParam(value = "sort", defaultValue = "") String sort,
+                                          @RequestParam(value = "direction", defaultValue = "asc") String direction,
+                                          @RequestParam(value = "filterByGender", defaultValue = "") String filterByGender) {
+        Pageable pageable = PersonPageableHelper.getPageable(page, sort, direction, filterByGender);
 
-		persons.forEach(x -> x.add(linkTo(methodOn(PersonController.class).getById(x.getId())).withSelfRel()));
+        var persons = service.findAll(pageable, filterByGender);
 
-		return persons;
-	}
+        persons.getContent().forEach(x -> x.add(linkTo(methodOn(PersonController.class).getById(x.getId())).withSelfRel()));
 
-	@PostMapping("/person")
-	@Operation(summary = "Create a person.", description = "Create a person.")
-	@ApiResponse(responseCode = "201", description = "Returns the person created.", content = {
-			@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = Person.class))) })
-	@ApiResponse(responseCode = "400", description = "Returns the errors in the request.", content = {
-			@Content(mediaType = MediaType.APPLICATION_JSON_VALUE) })
-	public ResponseEntity<Person> create(@Valid @RequestBody CreatePersonDto dto) {
-		var person = new Person();
-		person.setAddress(dto.getAddress());
-		person.setFirstName(dto.getFirstName());
-		person.setLastName(dto.getLastName());
-		person.setGender(dto.getGender());
-		var personFromDb = service.create(person);
-		personFromDb.add(linkTo(methodOn(PersonController.class).getById(personFromDb.getId())).withSelfRel());
-		return ResponseEntity.status(HttpStatus.CREATED).body(personFromDb);
-	}
+        return persons;
+    }
 
-	@PutMapping("/person/{id}")
-	public Person updateById(@PathVariable("id") long id, @RequestBody Person person) {
-		person.setId(id);
-		var personFromDb = service.update(person);
+    @PostMapping("/person")
+    @Operation(summary = "Create a person.", description = "Create a person.")
+    @ApiResponse(responseCode = "201", description = "Returns the person created.", content = {
+            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(schema = @Schema(implementation = Person.class)))})
+    @ApiResponse(responseCode = "400", description = "Returns the errors in the request.", content = {
+            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)})
+    public ResponseEntity<Person> create(@Valid @RequestBody CreatePersonDto dto) {
+        var person = new Person();
+        person.setAddress(dto.getAddress());
+        person.setFirstName(dto.getFirstName());
+        person.setLastName(dto.getLastName());
+        person.setGender(dto.getGender());
+        var personFromDb = service.create(person);
+        personFromDb.add(linkTo(methodOn(PersonController.class).getById(personFromDb.getId())).withSelfRel());
+        return ResponseEntity.status(HttpStatus.CREATED).body(personFromDb);
+    }
 
-		personFromDb.add(linkTo(methodOn(PersonController.class).getById(personFromDb.getId())).withSelfRel());
+    @PutMapping("/person/{id}")
+    public Person updateById(@PathVariable("id") long id, @RequestBody Person person) {
+        person.setId(id);
+        var personFromDb = service.update(person);
 
-		return personFromDb;
-	}
+        personFromDb.add(linkTo(methodOn(PersonController.class).getById(personFromDb.getId())).withSelfRel());
 
-	@DeleteMapping("/person/{id}")
-	public ResponseEntity<?> delete(@PathVariable("id") long id) {
-		service.deleteById(id);
-		return ResponseEntity.noContent().build();
-	}
+        return personFromDb;
+    }
+
+    @DeleteMapping("/person/{id}")
+    public ResponseEntity<?> delete(@PathVariable("id") long id) {
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }
