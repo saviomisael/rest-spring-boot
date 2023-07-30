@@ -59,7 +59,7 @@ public class SecurityConfig {
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> {
                     // variable arguments String... == String[]
-                            authorize.requestMatchers("/docs/**", "/swagger-ui/**", "/person**", "/api/signIn").permitAll();
+                            authorize.requestMatchers("/docs/**", "/swagger-ui/**", "/person", "/person/**", "/api/signIn", "/files", "/files/**").permitAll();
                             authorize.requestMatchers("/users").denyAll();
                             authorize.anyRequest().authenticated();
                         }

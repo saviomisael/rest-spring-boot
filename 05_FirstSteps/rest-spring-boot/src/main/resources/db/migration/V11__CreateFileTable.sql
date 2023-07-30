@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS files (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    file_data LONGBLOB NOT NULL,
+    extension VARCHAR(10) NOT NULL
+);
