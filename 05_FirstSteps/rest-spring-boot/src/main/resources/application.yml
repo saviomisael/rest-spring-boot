@@ -6,7 +6,7 @@ spring:
       max-request-size: 10MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/springboot?useTimezone=true&serverTimezone=UTC
+    url: jdbc:mysql://db:3306/springboot?useTimezone=true&serverTimezone=UTC
     username: "springboot"
     password: "springboot"
   jpa:

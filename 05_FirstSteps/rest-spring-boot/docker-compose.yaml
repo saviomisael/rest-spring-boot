@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    env_file: ".env"
+    volumes:
+      - springdata:/var/lib/mysql
+    healthcheck:
+      test: 'mysql -u root -p ${MYSQL_ROOT_PASSWORD} -e "SHOW DATABASES;"'
+      interval: 10s
+      timeout: 60s
+      retries: 10
+    networks:
+      - backend
+    restart: always
+  backend:
+    build:
+      context: .
+    depends_on:
+      db:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+    restart: always
+
+volumes:
+  springdata: {}
+networks:
+  backend: {}
